@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dao.UserDao">
+    <!--当domain中类的成员变量名字和数据库表中字段不匹配时，有两种方法：
+    1.起别名（类中成员变量名相当于别名，对应数据库中查询结果的显示（不改变表中字段名称就把显示结果中字段名称改为别名显示））
+    select id as userId from user ;
+    2.设置类成员变量和数据库表字段的映射信息，并在下方使用时不再使用 resultType="domain.User"，而是使用 resultMap="userMap"
+    id字段用<id> 其他字段用<result>
+    property（对应实体类成员变量名），column（对应数据库表字段名），jdbcType（数据库中类型），javaType（java中类型）
+    -->
+    <resultMap id="role" type="user">
+        <id property="id" column="userid"/>
+        <result property="username" column="username"/>
+        <result property="sex" column="sex"/>
+        <result property="address" column="address"/>
+        <result property="birthday" column="birthdy" />
+        <collection property="roles" ofType="role">
+            <id property="roleId" column="id"/>
+            <result property="roleName" column="role_name"/>
+            <result property="roleDesc" column="role_desc"/>
+        </collection>
+    </resultMap>
+    <resultMap id="account" type="user">
+        <id property="id" column="id"/>
+        <result property="address" column="address"/>
+        <result property="sex" column="sex"></result>
+        <result property="birthday" column="birthday"/>
+        <result property="username" column="username"/>
+        <collection property="list" ofType="Account" column="uid" ><!--oftype中写list中元素类型，如没有配置别名则使用全限定名-->
+            <!--因为上面有一个id了，所以第二个id要在sql中取别名，在此处column中填写sql中起的别名-->
+            <id property="id" column="aid"/>
+            <result property="money" column="money"/>
+            <result property="uid" column="uid"/>
+        </collection>
+    </resultMap>
+    <resultMap id="userMap" type="domain.User">
+        <!--id字段-->
+        <id property="userId" column="id"></id>
+        <!--非id字段-->
+        <result property="userSex" column="Sex"></result>
+    </resultMap>
+    <sql id="userinfo">
+<!--重复sql语句可以用这个包裹然后该用的地方<include>-->
+        select * from user
+    </sql>
+    <select id="findAll" resultType="User"><!--因为SqlMapConfig.xml中配置了别名，故直接使用类名就可以-->
+        select * from user;
+    </select>
+    <insert id="addUser" parameterType="domain.User">
+        <selectKey keyProperty="id" keyColumn="id" order="AFTER" resultType="int">
+            <!--id属性名称（对应实体类），id字段名称（对应数据库表），什么时候执行（插入之后），结果集类型（整形）-->
+            select last_insert_id();
+        </selectKey>
+        insert into user (username,address,sex,birthday)values(#{username},#{address},#{sex},#{birthday});
+    </insert>
+    <update id="updateUser" parameterType="domain.User">
+        update user set sex=#{sex},birthday=#{birthday,jdbcType=DATE} where id=#{id};
+    </update>
+    <delete id="deleteUser" parameterType="Integer">
+        delete from user where id=#{id};<!--当参数只有一个时，括号里面可以随便写比如aaa也可以，不用是id-->
+    </delete>
+    <select id="findUserByName" parameterType="String" resultType="int">
+        <!--select * from user where username like #{name};-->
+        select id from user where username like '%${value}%'<!--括号里面只能用value-->
+    </select>
+    <select id="countUser" resultType="int">
+        select count(id) from user ;
+    </select>
+    <select id="findByQueryVo" parameterType="domain.QueryVo" resultType="domain.User">
+        select * from user where username like #{user.username} and sex like
+        #{s};<!--相当于省略了get，将QueryVo.getUser变成了user-->
+    </select>
+    <select id="findByCondition" parameterType="User" resultType="User">
+        select * from user
+        <where> <!--多种条件查询-->
+            <if test="username!=null and sex != null"><!--&&要写成and-->
+                and username=#{username}and sex=#{sex}<!--在前面加上and用于拼接sql-->
+            </if>
+        </where>
+    </select>
+    <select id="findByIdList" parameterType="domain.QueryVo" resultType="User">
+        <include refid="userinfo"></include>
+        <where>
+            <if test="a!=null">
+                <foreach collection="a" open="id in (" close=")" item="id" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+        </where>
+    </select>
+    <!--这里必须换别名，因为两个表中都有id属性，如果不把其中一个换别名在封装时候就会起冲突-->
+    <select id="findAccount" resultMap="account">
+        select a.*,b.id as aid,b.money,b.uid from user a left join account b on a.id=b.uid
+    </select>
+    <select id="findRole" resultMap="role">
+        select r1.*,u.id as userid,u.username,u.sex,u.address,u.birthday from (select * from role r right join user_role ul on r.id=ul.rid) r1 right join user u on r1.uid=u.id;
+    </select>
+</mapper>

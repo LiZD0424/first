@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dao.AccountDao">
+    <sql id="allAccount">
+        select * from account
+    </sql>
+    <resultMap id="findAll" type="Account">
+        <id property="id" column="id"/>
+        <result property="uid" column="uid"/>
+        <result property="money" column="money"/>
+        <!-- select属性写的是能通过主属性唯一确定一条记录的查询方法-->
+        <association property="user" column="uid" javaType="User"
+                     select="dao.UserDao.findById"><!--column就是select中的查询条件-->
+        </association>
+    </resultMap>
+    <select id="findAll" resultMap="findAll">
+--             select a.*,b.id uid,b.username,b.sex,b.address,b.birthday from user b right join account a on a.uid=b.id; 这种sql语句不能实现延迟加载，因为同时查了两张表，能实现的只有一次查询一个表
+        select * from account
+    </select>
+    <select id="findByUid" resultType="account" parameterType="int">
+        select * from account where uid=#{uid};
+    </select>
+</mapper>

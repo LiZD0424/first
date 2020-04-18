@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dao.UserDao">
+    <!--配置二级缓存第二步,使接口配置类开启二级缓存-->
+    <cache/>
+
+    <resultMap id="account" type="user">
+        <id property="id" column="id"/>
+        <result property="address" column="address"/>
+        <result property="sex" column="sex"></result>
+        <result property="birthday" column="birthday"/>
+        <result property="username" column="username"/>
+        <collection property="list" ofType="Account" column="id"
+                    select="dao.AccountDao.findByUid"><!--oftype中写list中元素类型，如没有配置别名则使用全限定名-->
+        </collection>
+    </resultMap>
+
+    <select id="findById" resultType="user" parameterType="int" useCache="true"><!--配置二级缓存第三步，使方法支持二级缓存-->
+        select * from user where id=#{id}
+    </select>
+
+    <select id="findAll" resultMap="account">
+        select * from user
+    </select>
+
+    <update id="updataById" parameterType="user">
+        update user set username=#{username},sex=#{sex} where id=#{id}
+    </update>
+</mapper>
