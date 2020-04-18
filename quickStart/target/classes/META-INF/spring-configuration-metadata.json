@@ -1,0 +1,22 @@
+{
+  "groups": [
+    {
+      "name": "student",
+      "type": "Demo.controller.demo2",
+      "sourceType": "Demo.controller.demo2"
+    }
+  ],
+  "properties": [
+    {
+      "name": "student.address",
+      "type": "java.lang.String",
+      "sourceType": "Demo.controller.demo2"
+    },
+    {
+      "name": "student.name",
+      "type": "java.lang.String",
+      "sourceType": "Demo.controller.demo2"
+    }
+  ],
+  "hints": []
+}

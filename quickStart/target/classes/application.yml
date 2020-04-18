@@ -1,0 +1,27 @@
+#普通对象配置 key: value注意冒号后面有一个空格
+name: zhangsan
+#复杂对象配置，用缩进代表层级关系,相同缩进代表同一级别
+student:
+  address: tianjin
+  name: zhangsan
+#行内对象配置
+person: {name: zhangsan,age: 28,address: tianjin}
+#list配置方式
+people1:
+  - user1
+  - user2
+  - user3
+people2:
+  - name: zhangsan
+    age: 23
+  - name: lisi
+    age: 24
+#行内list配置方式
+people3: [user1,user2,user3]
+people4: [{name: zhangsan,age: 23},{name: lisi,age: 24}]
+#map
+mapname:
+  key1: value1
+  key2: value2
+  key3: value3
+
